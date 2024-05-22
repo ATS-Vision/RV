@@ -8,7 +8,6 @@
 
 #include <ament_index_cpp/get_package_share_directory.hpp>
 #include <image_transport/image_transport.hpp>
-#include <iostream>
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
 #include <rclcpp/duration.hpp>
@@ -31,7 +30,7 @@ ArmorDetectorNode::ArmorDetectorNode(const rclcpp::NodeOptions & options)
 : Node("armor_detector", options)
 {
   RCLCPP_INFO(this->get_logger(), "Starting ArmorDetectorNode!");
-  std::cout<<"start"<<std::endl;
+
   // Detector
   detector_ = initDetector();
 
@@ -62,7 +61,7 @@ ArmorDetectorNode::ArmorDetectorNode(const rclcpp::NodeOptions & options)
   text_marker_.lifetime = rclcpp::Duration::from_seconds(0.1);
 
   marker_pub_ =
-    this->create_publisher<visualization_msgs::msg::MarkerArray>("/detector/armor_marker", 10);
+    this->create_publisher<visualization_msgs::msg::MarkerArray>("/detector/marker", 10);
 
   // Debug Publishers
   debug_ = this->declare_parameter("debug", false);
@@ -94,7 +93,6 @@ ArmorDetectorNode::ArmorDetectorNode(const rclcpp::NodeOptions & options)
 
 void ArmorDetectorNode::imageCallback(const sensor_msgs::msg::Image::ConstSharedPtr img_msg)
 {
-  
   auto armors = detectArmors(img_msg);
 
   if (pnp_solver_ != nullptr) {
@@ -117,7 +115,6 @@ void ArmorDetectorNode::imageCallback(const sensor_msgs::msg::Image::ConstShared
         armor_msg.pose.position.x = tvec.at<double>(0);
         armor_msg.pose.position.y = tvec.at<double>(1);
         armor_msg.pose.position.z = tvec.at<double>(2);
-      
         // rvec to 3x3 rotation matrix
         cv::Mat rotation_matrix;
         cv::Rodrigues(rvec, rotation_matrix);
@@ -286,9 +283,6 @@ void ArmorDetectorNode::publishMarkers()
 }
 
 }  // namespace rm_auto_aim
-
-
-
 
 #include "rclcpp_components/register_node_macro.hpp"
 

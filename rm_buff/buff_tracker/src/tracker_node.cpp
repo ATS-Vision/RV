@@ -18,10 +18,11 @@ namespace rm_buff
         tracker_ = std::make_unique<Tracker>(max_match_distance, max_match_yaw_diff,max_match_pitch_diff);
         tracker_->tracking_thres = this->declare_parameter("tracker.tracking_thres", 5);  //目标跟踪阈值
 
-        lost_time_thres_ = this->declare_parameter("tracker.lost_time_thres", 0.3);   ///
+        lost_time_thres_ = this->declare_parameter("tracker.lost_time_thres", 0.3);   ///目标丢失时间阈值
+
 
         // EKF
-        // xa = x_armor, xc = x_robot_center
+        // xa = x_fan  xc=x_fan
         // state: xc, v_xc, yc, v_yc, za, v_za, yaw, v_yaw, pitch v_pitch
         // measurement: xa, ya, za, yaw  pitch
         // f - Process function
@@ -36,21 +37,21 @@ namespace rm_buff
         };
 
         // J_f - Jacobian of process function
-    auto j_f = [this](const Eigen::VectorXd &) {
-    Eigen::MatrixXd f(10, 10);
-    // clang-format off
-    f <<    1,   dt_, 0,   0,   0,   0,   0,   0,   0,  0,
-            0,   1,   0,   0,   0,   0,   0,   0,   0,  0,
-            0,   0,   1,   dt_, 0,   0,   0,   0,   0,  0,
-            0,   0,   0,   1,   0,   0,   0,   0,   0,  0,
-            0,   0,   0,   0,   1,   dt_, 0,   0,   0,  0,
-            0,   0,   0,   0,   0,   1,   0,   0,   0,  0,
-            0,   0,   0,   0,   0,   0,   1,   dt_, 0,  0,
-            0,   0,   0,   0,   0,   0,   0,   1,   0,  0,
-            0,   0,   0,   0,   0,   0,   0,   0,   1,  dt_,
-            0,   0,   0,   0,   0,   0,   0,   0,   0,   1;
-    // clang-format on
-    return f;
+        auto j_f = [this](const Eigen::VectorXd &) {
+          Eigen::MatrixXd f(10, 10);
+          // clang-format off
+          f <<    1,   dt_, 0,   0,   0,   0,   0,   0,   0,  0,
+                  0,   1,   0,   0,   0,   0,   0,   0,   0,  0,
+                  0,   0,   1,   dt_, 0,   0,   0,   0,   0,  0,
+                  0,   0,   0,   1,   0,   0,   0,   0,   0,  0,
+                  0,   0,   0,   0,   1,   dt_, 0,   0,   0,  0,
+                  0,   0,   0,   0,   0,   1,   0,   0,   0,  0,
+                  0,   0,   0,   0,   0,   0,   1,   dt_, 0,  0,
+                  0,   0,   0,   0,   0,   0,   0,   1,   0,  0,
+                  0,   0,   0,   0,   0,   0,   0,   0,   1,  dt_,
+                  0,   0,   0,   0,   0,   0,   0,   0,   0,   1;
+          // clang-format on
+          return f;
     };
 
      // h - Observation function
@@ -59,9 +60,9 @@ namespace rm_buff
     double xc = x(0), yc = x(2);
     z(0) = xc;  // xa
     z(1) = yc;  // ya
-    z(2) = x(4);               // za
-    z(3) = x(6);               // yaw
-    z(4) = x(8);              // pitch
+    z(2) = x(4);            // za
+    z(3) = x(6);            // yaw
+    z(4) = x(8);           // pitch
     return z;
     };
 
@@ -158,7 +159,7 @@ namespace rm_buff
 
     // Publisher
     target_pub_ = this->create_publisher<buff_interfaces::msg::Target>(
-    "/tracker/target", rclcpp::SensorDataQoS());
+    "/tracker/bufftarget", rclcpp::SensorDataQoS());
     
      // Visualization Marker Publisher
     // See http://wiki.ros.org/rviz/DisplayTypes/Marker
@@ -264,7 +265,7 @@ namespace rm_buff
     target_msg.yaw = state(6);          ///yaw
     target_msg.v_yaw = state(7);        ///v_yaw
     target_msg.pitch = state(8);        ///pitch
-    target_msg.v_pitch = tracker_->v_pitch;   ////v_pitch
+    target_msg.v_pitch = state(9);   ////v_pitch
     }
     }
     last_time_ = time;

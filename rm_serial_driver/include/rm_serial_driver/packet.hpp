@@ -15,7 +15,8 @@ struct ReceivePacket
   uint8_t header = 0x5A;
   uint8_t detect_color : 1;  // 0-red 1-blue
   bool reset_tracker : 1;
-  uint8_t reserved : 6;
+  bool mode : 1;            //0-autoaim 1-buff
+  uint8_t reserved : 5;
   float roll;
   float pitch;
   float yaw;
@@ -25,7 +26,7 @@ struct ReceivePacket
   uint16_t checksum = 0;
 } __attribute__((packed));
 
-struct SendPacket
+struct SendArmorPacket
 {
   uint8_t header = 0xA5;
   bool tracking : 1;
@@ -43,9 +44,26 @@ struct SendPacket
   float r1;
   float r2;
   float dz;
-  float area;
   uint16_t checksum = 0;
 } __attribute__((packed));
+
+struct SendBuffPacket
+{
+  uint8_t header = 0xA4;
+  bool tracking:1;
+  uint8_t reserved:7;
+  float x;
+  float y;
+  float z;
+  float yaw;
+  float pitch;
+  float vx;
+  float vy;
+  float vz;
+  float v_yaw;
+  float v_pitch;
+  uint16_t checksum=0;
+}__attribute__((packed));
 
 inline ReceivePacket fromVector(const std::vector<uint8_t> & data)
 {
@@ -54,12 +72,22 @@ inline ReceivePacket fromVector(const std::vector<uint8_t> & data)
   return packet;
 }
 
-inline std::vector<uint8_t> toVector(const SendPacket & data)
+inline std::vector<uint8_t> toVector(const SendArmorPacket & data)
 {
-  std::vector<uint8_t> packet(sizeof(SendPacket));
+  std::vector<uint8_t> packet(sizeof(SendArmorPacket));
   std::copy(
     reinterpret_cast<const uint8_t *>(&data),
-    reinterpret_cast<const uint8_t *>(&data) + sizeof(SendPacket), packet.begin());
+    reinterpret_cast<const uint8_t *>(&data) + sizeof(SendArmorPacket), 
+    packet.begin());
+  return packet;
+}
+
+inline std::vector<uint8_t> toVector(const SendBuffPacket& data)
+{
+  std::vector<uint8_t>  packet(sizeof(SendBuffPacket));
+  std::copy(reinterpret_cast<const uint8_t*>(&data),
+          reinterpret_cast<const uint8_t*>(&data)+sizeof(SendBuffPacket),
+          packet.begin());
   return packet;
 }
 

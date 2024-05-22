@@ -62,9 +62,7 @@ endif()
 ## Install ##
 #############
 
-install(DIRECTORY 
-  
+ament_auto_package(
+  INSTALL_TO_SHARE
   model
-  DESTINATION share/${PROJECT_NAME}
 )
-ament_package()

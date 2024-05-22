@@ -16,13 +16,23 @@ robot_state_publisher = Node(
     package='robot_state_publisher',
     executable='robot_state_publisher',
     parameters=[{'robot_description': robot_description,
-                 'publish_frequency': 1000.0}]
+                'publish_frequency': 1000.0}]
 )
 
 node_params = os.path.join(
     get_package_share_directory('rm_vision_bringup'), 'config', 'node_params.yaml')
 
-tracker_node = Node(
+armor_detector_node = Node(
+        package='armor_detector',
+        executable='armor_detector_node',
+        emulate_tty=True,
+        output='both',
+        parameters=[node_params],
+        arguments=['--ros-args', '--log-level',
+                   'buff_detector:='+launch_params['detector_log_level']],
+    )
+
+armor_tracker_node = Node(
     package='armor_tracker',
     executable='armor_tracker_node',
     output='both',
@@ -30,3 +40,24 @@ tracker_node = Node(
     parameters=[node_params],
     ros_arguments=['--log-level', 'armor_tracker:='+launch_params['tracker_log_level']],
 )
+
+buff_detector_Node= Node(
+        package='buff_detector',
+        executable='buff_detector_node',
+        emulate_tty=True,
+        output='both',
+        parameters=[node_params],
+        arguments=['--ros-args', '--log-level',
+                   'buff_detector:='+launch_params['detector_log_level']],
+    )
+
+buff_tracker_node = Node(
+    package='buff_tracker',
+    executable='buff_tracker_node',
+    output='both',
+    emulate_tty=True,
+    parameters=[node_params],
+    ros_arguments=['--log-level','buff_tracker:='+launch_params['tracker_log_level']],
+)
+
+

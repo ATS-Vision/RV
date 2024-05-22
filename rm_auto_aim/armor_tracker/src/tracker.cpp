@@ -7,7 +7,6 @@
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2/convert.h>
 
-#include <cmath>
 #include <rclcpp/logger.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
@@ -30,8 +29,7 @@ Tracker::Tracker(double max_match_distance, double max_match_yaw_diff)
 
 void Tracker::init(const Armors::SharedPtr & armors_msg)
 {
-  if (armors_msg->armors.empty()) 
-  {
+  if (armors_msg->armors.empty()) {
     return;
   }
 

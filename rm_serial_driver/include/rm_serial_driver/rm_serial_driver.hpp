@@ -6,10 +6,12 @@
 
 #include <tf2_ros/transform_broadcaster.h>
 
+#include <buff_interfaces/msg/detail/target__struct.hpp>
 #include <geometry_msgs/msg/transform_stamped.hpp>
 #include <rclcpp/publisher.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp/subscription.hpp>
+#include <rclcpp/subscription_options.hpp>
 #include <serial_driver/serial_driver.hpp>
 #include <std_msgs/msg/float64.hpp>
 #include <std_srvs/srv/trigger.hpp>
@@ -21,8 +23,10 @@
 #include <string>
 #include <thread>
 #include <vector>
-
+#include "packet.hpp"
+#include "buff_interfaces/msg/target.hpp"
 #include "auto_aim_interfaces/msg/target.hpp"
+
 
 namespace rm_serial_driver
 {
@@ -38,8 +42,8 @@ private:
 
   void receiveData();
 
-  void sendData(auto_aim_interfaces::msg::Target::SharedPtr msg);
-
+  void sendArmorData(auto_aim_interfaces::msg::Target::SharedPtr armor_msg);
+  void sendBuffData(buff_interfaces::msg::Target::SharedPtr buff_msg);
   void reopenPort();
 
   void setParam(const rclcpp::Parameter & param);
@@ -60,7 +64,7 @@ private:
   rclcpp::AsyncParametersClient::SharedPtr detector_param_client_;
   rclcpp::AsyncParametersClient::SharedPtr detector_buff_param_client;
   ResultFuturePtr set_param_future_;
-
+  ReceivePacket packet;
   // Service client to reset tracker
   rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr reset_tracker_client_;
 
@@ -71,7 +75,8 @@ private:
   double timestamp_offset_ = 0;
   std::unique_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
 
-  rclcpp::Subscription<auto_aim_interfaces::msg::Target>::SharedPtr target_sub_;
+  rclcpp::Subscription<auto_aim_interfaces::msg::Target>::SharedPtr target_armor_sub_;
+  rclcpp::Subscription<buff_interfaces::msg::Target>::SharedPtr target_buff_sub_;
 
   // For debug usage
   rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr latency_pub_;

@@ -18,7 +18,6 @@
 #include "auto_aim_interfaces/msg/debug_armors.hpp"
 #include "auto_aim_interfaces/msg/debug_lights.hpp"
 
-
 namespace rm_auto_aim
 {
 class Detector
@@ -72,7 +71,7 @@ public:
 private:
   bool isLight(const Light & possible_light);
   bool containLight(
-  const Light & light_1, const Light & light_2, const std::vector<Light> & lights);
+    const Light & light_1, const Light & light_2, const std::vector<Light> & lights);
   ArmorType isArmor(const Light & light_1, const Light & light_2);
 
   std::vector<Light> lights_;
